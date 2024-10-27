@@ -8,38 +8,32 @@ M.opts = {
 			transparency_toggle_file = "",
 		},
 	},
+	want_autocmd = false,
+	on_transparency_change = function() end,
 }
 
 M.toggle_transparency = function()
-	vim.g.is_transparent = not vim.g.is_transparent
+	local current_file_state = M.get_file_transparency_state()
+	vim.g.is_transparent = not current_file_state
+
+	M.change_transparency()
 end
 
-M.set_is_transparent = function(value)
-	value = tostring(value)
-
-	if value == "true" then
-		vim.g.is_transparent = true
-	elseif value == "false" then
-		vim.g.is_transparent = false
-	end
-end
-
-M.read_transparency_file = function()
+M.get_file_transparency_state = function()
 	local file = io.open(M.opts.transparency_state_file, "r")
 
 	if file then
 		local value = file:read("*a")
-		value = value:gsub("\n", "") -- Remove any trailing newline characters
-
-		M.set_is_transparent(value) -- Set transparency based on file content
+		value = value:gsub("\n", "")
 		file:close()
+
+		return value == "true"
 	else
-		M.set_is_transparent("false") -- Default to 'false' if the file doesn't exist
-		M.write_transparency_file() -- Write default transparency value
+		return false
 	end
 end
 
-M.write_transparency_file = function()
+M.change_transparency = function()
 	local file = io.open(M.opts.transparency_state_file, "w")
 
 	if file then
@@ -54,16 +48,17 @@ M.write_transparency_file = function()
 		file:write(tostring(vim.g.is_transparent))
 		file:close()
 
-		-- Exp: running server command
-		local toggle_cmd = string.format(
-			'nvim --server /tmp/nvim.pipe --remote-send "<CMD>lua ExecuteOnTransparencyChange("%s")<CR>" 2>/dev/null',
-			tostring(vim.g.is_transparent)
-		)
-
-		-- local toggle_cmd = 'nvim --server /tmp/nvim.pipe --remote-send ":lua ExecuteOnTransparencyChange()<CR>"'
-		-- local toggle_cmd = "sh /Users/apple/.config/nvim/sh/toggle_transparency.sh"
+		local toggle_cmd =
+			"nvim --server /tmp/nvim.pipe --remote-send \"<CMD>lua require('term_transparency').opts.on_transparency_change()<CR>\""
 		vim.fn.system(toggle_cmd)
 	end
+end
+
+M.sync_state = function()
+	local current_file_state = M.get_file_transparency_state()
+	vim.g.is_transparent = current_file_state
+
+	vim.notify(string.format("Transparency: %s", tostring(vim.g.is_transparent)), vim.log.levels.INFO)
 end
 
 M.setup = function(opts)
@@ -71,9 +66,15 @@ M.setup = function(opts)
 		M.opts = vim.tbl_deep_extend("force", M.opts, opts)
 	end
 
-	-- vim.notify(vim.inspect(opts), vim.log.levels.INFO)
+	if M.opts.want_autocmd then
+		vim.api.nvim_create_autocmd("FocusGained", {
+			callback = function()
+				M.opts.on_transparency_change()
+			end,
+		})
+	end
 
-	M.read_transparency_file()
+	M.opts.on_transparency_change()
 end
 
 return M
