@@ -8,17 +8,14 @@ M.opts = {
 			transparency_toggle_file = "",
 		},
 	},
-	-- on_transparency_change = nil,
 }
 
 M.toggle_transparency = function()
 	vim.g.is_transparent = not vim.g.is_transparent
-	-- vim.notify(string.format("State: %s", tostring(vim.g.is_transparent)), vim.log.levels.INFO)
 end
 
 M.set_is_transparent = function(value)
 	value = tostring(value)
-	vim.notify(string.format("Transparency value: %s", value), vim.log.levels.INFO)
 
 	if value == "true" then
 		vim.g.is_transparent = true
@@ -58,13 +55,13 @@ M.write_transparency_file = function()
 		file:close()
 
 		-- Exp: running server command
-		local toggle_cmd = 'nvim --server /tmp/nvim.pipe --remote-send ":lua ExecuteOnTransparencyChange()<CR>"'
+		local toggle_cmd = string.format(
+			'nvim --server /tmp/nvim.pipe --remote-send "<CMD>lua ExecuteOnTransparencyChange("%s")<CR>" 2>/dev/null',
+			tostring(vim.g.is_transparent)
+		)
 
-		-- local toggle_cmd = string.format(
-		-- 	'nvim --server /tmp/nvim.pipe --remote-send ":lua ExecuteOnTransparencyChange("%s")<CR>" 2>/dev/null',
-		-- 	tostring(vim.g.is_transparent)
-		-- )
-
+		-- local toggle_cmd = 'nvim --server /tmp/nvim.pipe --remote-send ":lua ExecuteOnTransparencyChange()<CR>"'
+		-- local toggle_cmd = "sh /Users/apple/.config/nvim/sh/toggle_transparency.sh"
 		vim.fn.system(toggle_cmd)
 	end
 end
