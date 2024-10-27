@@ -3,23 +3,24 @@ local private = {}
 
 -- check if the state file exists
 M.opts = {
-    -- where to save the transparency_state_file
+    -- filepath to save transparency state
     transparency_state_file = vim.fn.expand("~") .. "/.local/state/term/transparency.txt",
 
-    -- terminal emulators to be affected
+    -- terminal emulators settings
     term = {
+        -- wezterm is the only terminal supported as of now
         wezterm = {
             enabled = true,
-            transparency_toggle_file = "",
+            transparency_toggle_file = "", -- filepath to wezterm toggle script
         },
     },
 
-    -- notifications from the plugin
+    -- notification settings
     notifications = {
         enabled = true,
     },
 
-    -- want a autocmd to set transparency mode when terminal focus is gained
+    -- setup autocmd to set transparency mode when the neovim instance gains focus
     want_autocmd = false,
 
     -- callback function to be triggered when transparency changes
