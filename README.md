@@ -32,13 +32,10 @@ require('term_transparency').setup({
         },
     },
 
-    -- notification settings 
+    -- notification settings
     notifications = {
         enabled = true,
     },
-
-    -- setup autocmd to set transparency mode when the neovim instance gains focus
-    want_autocmd = false,
 
     -- callback function to be triggered when transparency changes
     on_transparency_change = function() end,
