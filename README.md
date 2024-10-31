@@ -1,17 +1,26 @@
 # term-transparency.nvim
 
-A plugin to control transparency mode of neovim and wezterm
+A Neovim plugin to seamlessly control transparency settings for both Neovim and WezTerm.
+
+## Features
+
+- Toggle transparency for all instances of Neovim and WezTerm with a single command
+- Persistent transparency state across sessions
+
+## Prerequisites
+
+- WezTerm (currently the only supported terminal emulator)
 
 ## Installation
 
-### lazy.nvim
+### [lazy.nvim](https://github.com/folke/lazy.nvim)
 
 ```lua
 {
-    'IniyanKanmani/term-transparency.nvim',
+    "IniyanKanmani/term-transparency.nvim",
 
     dependencies = {
-        -- all transparency changeable plugins
+        -- Add your transparency-related plugin dependencies here
     },
 }
 ```
@@ -19,10 +28,7 @@ A plugin to control transparency mode of neovim and wezterm
 ## Default Options
 
 ```lua
-require('term_transparency').setup({
-    -- filepath to save transparency state
-    transparency_state_file = vim.fn.expand("~") .. "/.local/state/term/transparency.txt",
-
+require("term_transparency").setup({
     -- terminal emulators settings
     term = {
         -- wezterm is the only terminal supported as of now
@@ -44,8 +50,24 @@ require('term_transparency').setup({
 
 ## Usage
 
+### Basic Keybinding
+
 ```lua
-vim.keymap.set('n', '<leader>bt', function()
-    require('term_transparency').toggle_transparency()
-end, { desc = 'Toggle [B]ackground [T]ransparency' })
+vim.keymap.set( "n", "<leader>bt", "<CMD>ToggleTermTransparency<CR>", { desc = "Toggle Terminal Transparency" })
 ```
+
+### Commands
+
+- `:ToggleTermTransparency` - Toggle transparency for both Neovim and WezTerm
+
+## Example Setup
+
+Check out these example configurations to get started:
+
+- [Plugin Config](example/term_transparency.lua)
+- [Wezterm Config](example/wezterm.lua)
+- [Wezterm Toggle Script](example/toggle_wezterm_transparency.sh)
+
+## Acknowledgments
+
+- This plugin was created as a learning project to understand Neovim plugin development.
