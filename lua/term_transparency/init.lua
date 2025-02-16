@@ -3,12 +3,17 @@ local private = {}
 
 -- check if the state file exists
 M.opts = {
+    transparency_value = 0.80,
+
     -- terminal emulators settings
     term = {
-        -- wezterm is the only terminal supported as of now
+        kitty = {
+            enabled = false,
+            socket = "/tmp/kitty.sock", -- socket that kitty listens to
+        },
+
         wezterm = {
-            enabled = true,
-            transparency_toggle_file = "", -- filepath to wezterm toggle script
+            enabled = false,
         },
     },
 
@@ -33,8 +38,25 @@ end
 private.transparency_state_file = vim.fn.expand("~") .. "/.local/state/term/transparency.txt"
 
 private.init = function()
+    private.plugin_dir = debug.getinfo(1, "S").source:sub(2):match("(.-)/lua/")
+
     if private.check_if_file_exists() == false then
         private.create_transparency_state_file()
+    end
+
+    if M.opts.term.kitty.enabled then
+        private.kitty = {}
+        private.kitty.script_file =
+            vim.fn.fnamemodify(private.plugin_dir .. "/scripts/toggle_kitty_transparency.sh", ":p")
+
+        private.kitty.socket_dir = vim.fn.fnamemodify(M.opts.term.kitty.socket, ":h")
+        private.kitty.socket_file = vim.fn.fnamemodify(M.opts.term.kitty.socket, ":t")
+    end
+
+    if M.opts.term.wezterm.enabled then
+        private.wezterm = {}
+        private.wezterm.script_file =
+            vim.fn.fnamemodify(private.plugin_dir .. "/scripts/toggle_wezterm_transparency.sh", ":p")
     end
 
     private.check_nvim_version()
@@ -131,7 +153,7 @@ end
 private.on_change = function(error, filename, events)
     if error then
         if M.opts.notifications.enabled then
-            vim.notify(string.format("term-transparency\n Error: %s", error), vim.log.levels.ERROR)
+            vim.notify(string.format("term-transparency.nvim\nError: %s", error), vim.log.levels.ERROR)
         end
 
         return
@@ -162,8 +184,22 @@ end
 private.sync_state = function(transparency)
     vim.g.is_transparent = transparency
 
+    local transparency_value = transparency and tostring(M.opts.transparency_value) or "1"
+
+    if M.opts.term.kitty.enabled then
+        local kitty_toggle_cmd = private.kitty.script_file
+            .. " "
+            .. private.kitty.socket_file
+            .. " "
+            .. private.kitty.socket_dir
+            .. " "
+            .. transparency_value
+
+        vim.fn.system("sh " .. kitty_toggle_cmd)
+    end
+
     if M.opts.term.wezterm.enabled then
-        local wezterm_toggle_cmd = M.opts.term.wezterm.transparency_toggle_file .. " " .. tostring(transparency)
+        local wezterm_toggle_cmd = private.wezterm.script_file .. " " .. transparency_value
 
         vim.fn.system("sh " .. wezterm_toggle_cmd)
     end
@@ -173,7 +209,7 @@ private.sync_state = function(transparency)
     if M.opts.notifications.enabled then
         vim.notify(
             string.format(
-                "term-transparency\n Terminal mode: %s",
+                "term-transparency.nvim\nTerminal mode: %s",
                 transparency and "transparent" or "normal",
                 vim.log.levels.INFO
             )
