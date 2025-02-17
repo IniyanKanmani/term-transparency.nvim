@@ -1,15 +1,15 @@
 # term-transparency.nvim
 
-A Neovim plugin to seamlessly control transparency settings for both Neovim and WezTerm.
+A Neovim plugin to seamlessly control transparency settings of Neovim and Terminal
 
 ## Features
 
-- Toggle transparency for all instances of Neovim and WezTerm with a single command
+- Toggle transparency for all Neovim instances and Terminal with a single command
 - Persistent transparency state across sessions
 
 ## Prerequisites
 
-- WezTerm (currently the only supported terminal emulator)
+- Kitty Or WezTerm
 
 ## Installation
 
@@ -31,10 +31,16 @@ A Neovim plugin to seamlessly control transparency settings for both Neovim and 
 require("term_transparency").setup({
     -- terminal emulators settings
     term = {
-        -- wezterm is the only terminal supported as of now
+        transparency_value = 0.80,
+
+        -- terminal emulators settings
+        kitty = {
+            enabled = false,
+            socket = "/tmp/kitty.sock", -- socket that kitty listens to
+        },
+
         wezterm = {
-            enabled = true,
-            transparency_toggle_file = "", -- filepath to wezterm toggle script
+            enabled = false,
         },
     },
 
@@ -50,23 +56,33 @@ require("term_transparency").setup({
 
 ## Usage
 
+Set up required files for your terminal like in [Example Setup](#example-setup) section
+
+### Command
+
+- `:ToggleTermTransparency` - Toggle transparency of Neovim and Terminal
+
 ### Basic Keybinding
 
 ```lua
 vim.keymap.set( "n", "<leader>bt", "<CMD>ToggleTermTransparency<CR>", { desc = "Toggle Terminal Transparency" })
 ```
 
-### Commands
-
-- `:ToggleTermTransparency` - Toggle transparency for both Neovim and WezTerm
-
 ## Example Setup
 
-Check out these example configurations to get started:
+Check out these example configurations to get started
+
+### Neovim
 
 - [Plugin Config](example/term_transparency.lua)
+
+### Kitty
+
+- [Kitty Config](example/kitty.conf)
+
+### Wezterm
+
 - [Wezterm Config](example/wezterm.lua)
-- [Wezterm Toggle Script](example/toggle_wezterm_transparency.sh)
 
 ## Acknowledgments
 
