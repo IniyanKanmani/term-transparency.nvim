@@ -1,5 +1,5 @@
 return {
-    { -- Term Transparency: Toggle transparency of Neovim and Wezterm
+    { -- Term Transparency: Toggle transparency of Neovim and Terminal
         "IniyanKanmani/term-transparency.nvim",
 
         dependencies = {
@@ -12,18 +12,22 @@ return {
         priority = 1000,
 
         opts = {
+            transparency_value = 0.80,
+
             term = {
-                wezterm = {
+                kitty = {
                     enabled = true,
-                    transparency_toggle_file = vim.fn.expand("~") .. "/.config/wezterm/toggle_wezterm_transparency.sh",
+                    socket = "/tmp/kitty.sock",
+                },
+
+                wezterm = {
+                    enabled = false,
                 },
             },
-
             notifications = {
-                enabled = false,
+                enabled = true,
             },
 
-            -- Note: Dependency plugins doesn't have to be setup. They will be setup when this plugin is setup with this callback.
             on_transparency_change = function()
                 require("tokyonight").setup(
                     vim.g.is_transparent and TokyoNightTransparentThemeOpts or TokyoNightNormalThemeOpts
